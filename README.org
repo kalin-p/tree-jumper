@@ -1,0 +1,28 @@
+#+title: tree-jumper - jump to tree-sitter nodes with hints
+
+* Demo
+[[./demo.apng]]
+
+* Colors
+For each hint a random number is generated. Each value is produced by the
+following formula:
+
+~bg_color_value + tree-jumper-*-base + (random_value * tree-jumper-*-rand-coef)~
+
+The value for hue is wrapped, saturation and luminance are clamped
+
+* Example config
+#+begin_src elisp
+  (use-package tree-jumper
+    :straight (:host github :repo "kalin-p/tree-jumper" :branch main)
+    :config
+    ;; tweak how the colors are generated
+    (setq tree-jumper-hue-rand-coef 0.15
+          tree-jumper-saturation-rand-coef 0.0
+          tree-jumper-luminance-rand-coef 0.0
+          tree-jumper-hue-base 0.0
+          tree-jumper-saturation-base 0.1
+          tree-jumper-luminance-base 0.03)
+    ;; set with which modes you want to use it 
+    :hook ((rust-ts-mode python-ts-mode) . tree-jumper))
+#+end_src
