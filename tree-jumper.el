@@ -355,8 +355,6 @@ to hold the command to activate it.")
   (setq tree-jumper-luminance-base 0.03))
 
 (defun tree-jumper-setup ()
-  ; 1)
-  (setq tree-jumper-is-active t)
   (let ((declared-hints (apply #'append (mapcar (lambda (sym)
                                                   (symbol-value sym))
                                                 tree-jumper-use-hints))))
@@ -382,6 +380,7 @@ to hold the command to activate it.")
 
   (add-hook 'window-scroll-functions #'tree-jumper-on-scroll nil t)
 
+  (setq tree-jumper-is-active t)
   (tree-jumper-update (treesit-buffer-root-node) nil))
 
 (define-minor-mode tree-jumper
