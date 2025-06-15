@@ -1,5 +1,7 @@
 ;;; tree-jumper.el --- Hint interface for navigating tree-sitter syntax trees -*- lexical-binding: t; -*-
 
+(require 'treesit)
+
 (defvar-local tree-jumper-current-node nil)
 
 (defvar tree-jumper-home-row-hints
@@ -54,15 +56,15 @@ tree-jumper-hint-alphabet."
 numerals to an integer."
   (let ((num 0)
         (l (1- (length str))))
-    (mapcar (lambda (char)
-              (setq num
-                    (+ num
-                       (* (cl-position (char-to-string char)
+    (mapc (lambda (char)
+            (setq num
+                  (+ num
+                     (* (cl-position (char-to-string char)
                                      tree-jumper-hint-alphabet
                                      :test #'equal)
-                          (expt (length tree-jumper-hint-alphabet) l))))
-              (setq l (1- l)))
-              str)
+                        (expt (length tree-jumper-hint-alphabet) l))))
+            (setq l (1- l)))
+          str)
     num))
 
 (defvar tree-jumper-hint-keymaps [] )
@@ -76,8 +78,8 @@ numerals to an integer."
         ((= level 0)
          (let ((keymap (define-keymap))
                (cmd #'tree-jumper-jump))
-           (mapcar (lambda (hint)
-                     (define-key keymap hint cmd))
+           (mapc (lambda (hint)
+                   (define-key keymap hint cmd))
                    tree-jumper-hint-alphabet)
            keymap))
         (t
@@ -97,6 +99,8 @@ numerals to an integer."
                      (list (tree-jumper-make-keymap n-keymaps))))
       (setq n-keymaps (1+ n-keymaps)))))
 
+(defvar-local tree-jumper-hint-vec [])
+
 (defun tree-jumper-jump ()
   (interactive)
   (let ((dest (aref tree-jumper-hint-vec
@@ -111,7 +115,7 @@ numerals to an integer."
        (treesit-node-field-name ts-node)
        (= 0 (length (treesit-node-children ts-node t)))))
 
-(defvar-local tree-jumper-hint-vec [])
+
 (defvar-local tree-jumper-node-count 0)
 (defvar-local tree-jumper-depth 30)
 
