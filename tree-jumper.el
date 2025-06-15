@@ -1,6 +1,7 @@
 ;;; tree-jumper.el --- Hint interface for navigating tree-sitter syntax trees -*- lexical-binding: t; -*-
 
 (require 'treesit)
+(require 'color)
 
 (defvar-local tree-jumper-current-node nil)
 
