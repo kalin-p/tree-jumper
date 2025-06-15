@@ -100,9 +100,9 @@ position")
          (let ((keymap (define-keymap)) ;
                (cmd (aref tree-jumper-hint-keymaps
                           (1- level))))
-           (mapcar (lambda (hint)
-                     (define-key keymap hint cmd))
-                   tree-jumper-hint-alphabet)
+           (mapc (lambda (hint)
+                   (define-key keymap hint cmd))
+                 tree-jumper-hint-alphabet)
            keymap))))
 
 (defun tree-jumper-ensure-hint-keymaps (hint-width)
@@ -139,8 +139,7 @@ tree nodes to hint"
 (defun tree-jumper-bfs (node)
   "This function does a breadth-first search on the nodes in the
 syntax tree and appends them to a list."
-  (let* ((depth 0)
-         (range-start (window-start))
+  (let* ((range-start (window-start))
          (range-end (window-end nil t))
          (tree (treesit-induce-sparse-tree
                 node
@@ -326,7 +325,7 @@ to hold the command to activate it.")
     (dotimes (i tree-jumper-node-count)
       (aset tree-jumper-overlays i (tree-jumper-make-overlay i hint-width)))))
 
-(defun tree-jumper-update (ts-node &optional named)
+(defun tree-jumper-update (ts-node)
   (setq tree-jumper-current-node ts-node)
   (tree-jumper-remove-overlays)
   (tree-jumper-bfs ts-node)
@@ -342,6 +341,9 @@ to hold the command to activate it.")
 
   (tree-jumper-visualize-hints))
 
+;; this will trigger 2 compilation warnings, because we do not use any of the
+;; arguments, but functions that are called by window hooks must have these
+;; parameter
 (defun tree-jumper-on-scroll (window new-start-pos)
   (when tree-jumper-is-active
     (tree-jumper-update (treesit-buffer-root-node))))
@@ -372,7 +374,7 @@ to hold the command to activate it.")
   (add-hook 'window-scroll-functions #'tree-jumper-on-scroll nil t)
 
   (setq tree-jumper-is-active t)
-  (tree-jumper-update (treesit-buffer-root-node) nil))
+  (tree-jumper-update (treesit-buffer-root-node)))
 
 (define-minor-mode tree-jumper
   "Some docs"
