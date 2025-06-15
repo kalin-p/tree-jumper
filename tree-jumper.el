@@ -4,6 +4,9 @@
 
 (defvar-local tree-jumper-current-node nil)
 
+;; varibles named like tree-jumper-*-hints hold lists of characters to be used
+;; as hints. They are easily composed by adding the names of the ones you want
+;; to use to ~tree-jumper-use-hints~.
 (defvar tree-jumper-home-row-hints
   '("a" "s" "d" "f" "g" "h" "j" "k" "l"))
 
@@ -25,7 +28,7 @@
 
 (defun tree-jumper-filter-out-command-keys (hint-space keymap)
   "Function that removes any characters that have been bound as keys
-  in the command keymap from the list of character that will be
+  in the command keymap from the list of characters that will be
   used as hints."
   (if (keymapp keymap)
       (let ((hint hint-space)
@@ -37,6 +40,10 @@
         (reverse keep))
     (error "tree-jumper-filter-out-command-keys requires a keymap as its second argument.")))
 
+;; Generating hints is the same as enumerating objects. The difference is that
+;; we want the generated numbers to be written in a way that is easy and quick
+;; to type on a keyboard. So instead of using normal base 10 it is more fitting
+;; to use base 26 for example and use the English alphabet as numerals.
 (defun convert-base10-to-alphabet-radix (num)
   "Write a base-10 number as a string with the numerals in
 tree-jumper-hint-alphabet."
@@ -67,7 +74,13 @@ numerals to an integer."
           str)
     num))
 
-(defvar tree-jumper-hint-keymaps [] )
+(defvar tree-jumper-hint-keymaps []
+  "Holds a keymap for each character in a hint, e.g. if we have
+hints that are 3 characters long it will have 3 keymaps. All
+keymaps except the last one are prefix keymaps and point ot the
+next one. The final keymap uses a function that tranlates the
+accumulated command (via this-command-keys) to a tree-sitter node
+position")
 
 (defun tree-jumper-get-keymap (level)
   (aref tree-jumper-hint-keymaps (1- level)))
@@ -102,6 +115,7 @@ numerals to an integer."
 (defvar-local tree-jumper-hint-vec [])
 
 (defun tree-jumper-jump ()
+  "Tranlates hint to a tree-sitter node and sets the point there."
   (interactive)
   (let ((dest (aref tree-jumper-hint-vec
                     (convert-alphabet-radix-to-base10 (this-command-keys)))))
@@ -110,6 +124,8 @@ numerals to an integer."
       (tree-jumper-update (treesit-node-parent dest)))))
 
 (defun tree-jumper-sparse-tree-pred (range-start range-end ts-node)
+  "This predicate is used by tree-jumper to determine which syntax
+tree nodes to hint"
   (and (> (treesit-node-start ts-node) range-start)
        (< (treesit-node-end ts-node) range-end)
        (treesit-node-field-name ts-node)
@@ -120,6 +136,8 @@ numerals to an integer."
 (defvar-local tree-jumper-depth 30)
 
 (defun tree-jumper-bfs (node)
+  "This function does a breadth-first search on the nodes in the
+syntax tree and appends them to a list."
   (let* ((depth 0)
          (range-start (window-start))
          (range-end (window-end nil t))
@@ -145,10 +163,15 @@ numerals to an integer."
                               tree)))))
     (setq tree-jumper-node-count count)))
 
-(defvar-local tree-jumper-is-active nil)
+(defvar-local tree-jumper-is-active nil
+  "This var tracks weather the minor mode is in active or inactive
+state.")
 
 (defvar tree-jumper-active-keymap
-  (define-keymap :full t))
+  (define-keymap :full t)
+  "Keymap used by tree-jumper in its active state. It is defined
+with :full t, to discourage using other commands at the same time
+as using hints.")
 
 (defun tree-jumper-activate ()
   (interactive)
@@ -158,7 +181,9 @@ numerals to an integer."
 
 (defvar tree-jumper-inactive-keymap
   (define-keymap
-    "C-j" #'tree-jumper-activate))
+    "C-j" #'tree-jumper-activate)
+  "Keymap used when tree-jumper is in inactive state. It only needs
+to hold the command to activate it.")
 
 (defun tree-jumper-suspend ()
   (interactive)
@@ -179,13 +204,16 @@ numerals to an integer."
                                                   (treesit-node-eq (treesit-node-parent arg) root)))))))
 
 (defvar tree-jumper-command-keymap 
-;; (setq tree-jumper-command-keymap
   (define-keymap
     "q" #'tree-jumper-suspend
     "u" #'tree-jumper-goto-root
     "C-v" #'scroll-up-command
-    "M-v" #'scroll-down-command))
+    "M-v" #'scroll-down-command)
+  "Keymap that defines commands to be used while hints are active.")
 
+;; The following variables determine how hints are colored. Colors are generated
+;; from the color of the background by adding random values factorized by these
+;; coefficients.
 (defvar tree-jumper-hue-rand-coef 0.3)
 (defvar tree-jumper-saturation-rand-coef 0.0)
 (defvar tree-jumper-luminance-rand-coef 0.0)
@@ -211,7 +239,6 @@ numerals to an integer."
         ((< value 0.0)
          0.0)))
 
-; I do not expect this to change often, so defvar default should be enough.
 (defvar tree-jumper-background-color-hsl
   (apply #'color-rgb-to-hsl
          (color-name-to-rgb (face-background 'default))))
@@ -247,7 +274,10 @@ numerals to an integer."
     :hint-fg-saturate-percent 40
     :hint-color-item nil))
 
-(defvar tree-jumper-overlays [])
+;; To display hits overlays are used. This does not change the buffer in any
+;; way, which would have been really annoying.
+(defvar tree-jumper-overlays []
+  "Vector that contains the overlays used to display hints to the user.")
 
 (defun tree-jumper-hsl-saturate-lighten (hsl saturate-percent lighten-percent)
   (let ((saturated (apply #'color-saturate-hsl (append hsl (list saturate-percent)))))
