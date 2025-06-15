@@ -250,20 +250,20 @@ to hold the command to activate it.")
 (defun tree-jumper-generate-color (letter anchor-color)
   (let* ((rand-val (/ (float (random (concat letter
                                              tree-jumper-random-color-seed)))
-                      (float most-positive-fixnum))))
-
-    `(,(tree-jumper-wrap-float-0-1
-                      (+ (car anchor-color)
-                         tree-jumper-hue-base
-                         (* rand-val tree-jumper-hue-rand-coef)))
-                    ,(tree-jumper-clamp-float-0-1
-                      (+ (cadr anchor-color)
-                         tree-jumper-saturation-base
-                         (* rand-val tree-jumper-saturation-rand-coef)))
-                    ,(tree-jumper-clamp-float-0-1
-                      (+ (caddr anchor-color)
-                         tree-jumper-luminance-base
-                         (* rand-val tree-jumper-luminance-rand-coef))))))
+                      (float most-positive-fixnum)))
+	 (hue (tree-jumper-wrap-float-0-1
+               (+ (car anchor-color)
+		  tree-jumper-hue-base
+		  (* rand-val tree-jumper-hue-rand-coef))))
+	 (saturation (tree-jumper-clamp-float-0-1
+		      (+ (cadr anchor-color)
+			 tree-jumper-saturation-base
+			 (* rand-val tree-jumper-saturation-rand-coef))))
+	 (luminance (tree-jumper-clamp-float-0-1
+		     (+ (caddr anchor-color)
+			tree-jumper-luminance-base
+			(* rand-val tree-jumper-luminance-rand-coef)))))
+    '(hue saturation luminance)))
 
 (defvar tree-jumper-hint-colors [])
 
@@ -393,9 +393,7 @@ to hold the command to activate it.")
          (setq tree-jumper nil)
          (error "No tree-sitter parsers running in this buffer"))
         (tree-jumper
-         (tree-jumper-user-config)
-         (tree-jumper-setup)
-         )
+         (tree-jumper-setup))
         (t
          (tree-jumper-remove-overlays)
          (remove-hook 'window-scroll-functions #'tree-jumper-on-scroll t)
