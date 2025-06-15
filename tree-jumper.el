@@ -263,7 +263,7 @@ to hold the command to activate it.")
 		     (+ (caddr anchor-color)
 			tree-jumper-luminance-base
 			(* rand-val tree-jumper-luminance-rand-coef)))))
-    '(hue saturation luminance)))
+    (list hue saturation luminance)))
 
 (defvar tree-jumper-hint-colors [])
 
