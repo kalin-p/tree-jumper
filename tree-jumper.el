@@ -122,7 +122,8 @@ position")
                     (convert-alphabet-radix-to-base10 (this-command-keys)))))
     (when dest
       (goto-char (treesit-node-start dest))
-      (tree-jumper-update (treesit-node-parent dest)))))
+      ;; (tree-jumper-update (treesit-node-parent dest))
+      (tree-jumper-suspend))))
 
 (defun tree-jumper-sparse-tree-pred (range-start range-end ts-node)
   "This predicate is used by tree-jumper to determine which syntax
