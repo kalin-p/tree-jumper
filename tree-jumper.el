@@ -345,15 +345,6 @@ to hold the command to activate it.")
   (when tree-jumper-is-active
     (tree-jumper-update (treesit-buffer-root-node))))
 
-(defun tree-jumper-user-config ()
-  (setq tree-jumper-hue-rand-coef 0.15)
-  (setq tree-jumper-saturation-rand-coef 0.0)
-  (setq tree-jumper-luminance-rand-coef 0.0)
-
-  (setq tree-jumper-hue-base 0.0)
-  (setq tree-jumper-saturation-base 0.1)
-  (setq tree-jumper-luminance-base 0.03))
-
 (defun tree-jumper-setup ()
   (let ((declared-hints (apply #'append (mapcar (lambda (sym)
                                                   (symbol-value sym))
@@ -365,8 +356,7 @@ to hold the command to activate it.")
   (setq tree-jumper-hint-vec (make-vector tree-jumper-max-hints nil)
         tree-jumper-hint-colors (make-vector tree-jumper-max-hints nil)
         tree-jumper-overlays (make-vector tree-jumper-max-hints nil))
-  ; 5)
-  ; update background color
+
   (setq tree-jumper-background-color-hsl
         (apply #'color-rgb-to-hsl
                (color-name-to-rgb (face-background 'default))))
