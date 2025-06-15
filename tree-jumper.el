@@ -341,10 +341,10 @@ to hold the command to activate it.")
 
   (tree-jumper-visualize-hints))
 
-;; this will trigger 2 compilation warnings, because we do not use any of the
-;; arguments, but functions that are called by window hooks must have these
-;; parameter
-(defun tree-jumper-on-scroll (window new-start-pos)
+;; We do not use any of the arguments, but functions that are called by window
+;; hooks must have these parameters. To avoid raising compilation warnings the
+;; arguments must be prefixed with `_`
+(defun tree-jumper-on-scroll (_window _new-start-pos)
   (when tree-jumper-is-active
     (tree-jumper-update (treesit-buffer-root-node))))
 
