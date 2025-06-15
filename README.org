@@ -1,7 +1,7 @@
 #+title: tree-jumper - jump to tree-sitter nodes with hints
 
 * Demo
-[[./demo.apng]]
+[[./demo.gif]]
 
 * Colors
 For each hint a random number is generated. Each value is produced by the
