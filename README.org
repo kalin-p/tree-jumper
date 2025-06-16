@@ -4,12 +4,12 @@
 [[./demo.gif]]
 
 * Colors
-For each hint a random number is generated. Each value is produced by the
-following formula:
+For each hint a random number is generated. Each color component (hue,
+saturation, value) is produced by the following formula:
 
 ~bg_color_value + tree-jumper-*-base + (random_value * tree-jumper-*-rand-coef)~
 
-The value for hue is wrapped, saturation and luminance are clamped
+The value for hue is wrapped, saturation and luminance are clamped.
 
 * Example config
 #+begin_src elisp
